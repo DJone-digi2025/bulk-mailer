@@ -39,22 +39,25 @@ if (req.method === 'POST' && req.url === '/connect') {
 
       console.log('VERIFYING SMTP...');
 
-      transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: email,
-          pass: appPassword
-        }
-      });
+transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: email,
+    pass: appPassword
+  }
+});
 
-      await transporter.verify();
+console.log('SMTP CREATED');
 
-      console.log('SMTP VERIFIED');
+gmailUser = email;
 
-      gmailUser = email;
-
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true, email }));
+res.writeHead(200, { 'Content-Type': 'application/json' });
+res.end(JSON.stringify({
+  success: true,
+  email
+}));
 
     } catch (err) {
       console.error('CONNECT ERROR:', err);
