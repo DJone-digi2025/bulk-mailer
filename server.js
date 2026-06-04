@@ -41,8 +41,8 @@ if (req.method === 'POST' && req.url === '/connect') {
 
 transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false,
   auth: {
     user: email,
     pass: appPassword
@@ -84,13 +84,33 @@ res.end(JSON.stringify({
     req.on('end', async () => {
       try {
         const { to, subject, text } = JSON.parse(body);
-        await transporter.sendMail({ from: gmailUser, to, subject, text });
+        console.log(`SENDING TO ${to}`);
+
+const info = await transporter.sendMail({
+  from: gmailUser,
+  to,
+  subject,
+  text
+});
+
+console.log('MAIL SENT:', info.messageId);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true }));
-      } catch (err) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, error: err.message }));
-      }
+      } 
+catch (err) {
+  console.error('SEND ERROR:', err);
+
+  res.writeHead(500, {
+    'Content-Type': 'application/json'
+  });
+
+  res.end(JSON.stringify({
+    success: false,
+    error: err.message,
+    code: err.code,
+    command: err.command
+  }));
+}
     });
     return;
   }
