@@ -40,16 +40,14 @@ if (req.method === 'POST' && req.url === '/connect') {
       console.log('VERIFYING SMTP...');
 
 transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
+  service: 'gmail',
   auth: {
     user: email,
     pass: appPassword
-  }
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000
 });
 
 console.log('SMTP CREATED');
