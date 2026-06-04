@@ -24,27 +24,51 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === 'POST' && req.url === '/connect') {
-    let body = '';
-    req.on('data', chunk => body += chunk);
-    req.on('end', async () => {
-      try {
-        const { email, appPassword } = JSON.parse(body);
-        transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: { user: email, pass: appPassword }
-        });
-        await transporter.verify();
-        gmailUser = email;
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, email }));
-      } catch (err) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, error: err.message }));
-      }
-    });
-    return;
-  }
+if (req.method === 'POST' && req.url === '/connect') {
+  console.log('CONNECT REQUEST RECEIVED');
+
+  let body = '';
+
+  req.on('data', chunk => body += chunk);
+
+  req.on('end', async () => {
+    try {
+      console.log('BODY RECEIVED');
+
+      const { email, appPassword } = JSON.parse(body);
+
+      console.log('VERIFYING SMTP...');
+
+      transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: email,
+          pass: appPassword
+        }
+      });
+
+      await transporter.verify();
+
+      console.log('SMTP VERIFIED');
+
+      gmailUser = email;
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, email }));
+
+    } catch (err) {
+      console.error('CONNECT ERROR:', err);
+
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: false,
+        error: err.message
+      }));
+    }
+  });
+
+  return;
+}
 
   if (req.method === 'POST' && req.url === '/send') {
     if (!transporter) {
